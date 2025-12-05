@@ -3,24 +3,25 @@
 Starter Code
 
 # For Partners
-
-You need to copy the /db folder from homework 3 to the root of this project. So your app should have:
+### Setup
+You need to copy the /db folder from homework 3 to the root of this project after you clone the repo. So your this folder and file should exist:
 ```
-/webdev-crimespa/db/stpaul_crime.sqlite3
+/db/stpaul_crime.sqlite3
 ```
-I can't just add it to the repo because the file is too big, so you need to add it on your own.
+I can't add the db file to the repo because the file is too big, so you need to add it on your own. 
 
+### Running it
 
+To test it, you need to run the following commands in two seperate terminals: 
 
-To test it, you need to run the following commands in two seperate terminals:
 Run the Vue app:
 ```
 npm run dev
 ```
-Run the backend server:
+Run the node server:
 ```
 node rest_server.mjs
 ```
 
 
-Otherwise we can't make requests to the backend if it is not running.
+Without the the node server running, we can't make get anything from our db.
