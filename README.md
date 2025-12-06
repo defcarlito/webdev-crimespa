@@ -24,4 +24,4 @@ node rest_server.mjs
 ```
 
 
-Without the the node server running, we can't make get anything from our db.
+Without the the node server running, we can't request anything from our db.
