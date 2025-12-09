@@ -47,6 +47,8 @@ let map = reactive({
   ],
 });
 let incidents = ref([]);
+let locationInput = ref("St. Paul, MN");
+let searchMarker = null;
 
 // Vue callback for once <template> HTML has been added to web page
 onMounted(() => {
@@ -65,6 +67,32 @@ onMounted(() => {
     [44.883658, -93.217977],
     [45.008206, -92.993787],
   ]);
+
+  // Add center marker
+  const centerIcon = L.divIcon({
+    className: 'center-marker',
+    html: '<div style="background: red; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px black;"></div>',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  });
+  
+  const centerMarker = L.marker(map.leaflet.getCenter(), {
+    icon: centerIcon,
+    interactive: false
+  }).addTo(map.leaflet);
+
+  // Update location when map moves
+  map.leaflet.on('moveend', async () => {
+    const center = map.leaflet.getCenter();
+    centerMarker.setLatLng(center);
+    
+    // Get address for center
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}`
+    );
+    const data = await response.json();
+    locationInput.value = data.display_name;
+  });
 
   // Get boundaries for St. Paul neighborhoods
   let district_boundary = new L.geoJson();
@@ -138,24 +166,35 @@ function drawNeighborhoods() {
       );
   });
 }
+
+// Go to location
+async function goToLocation() {
+  const address = locationInput.value + ", St. Paul, MN";
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+  );
+  const data = await response.json();
+  
+  if (data.length > 0) {
+    const lat = parseFloat(data[0].lat);
+    const lng = parseFloat(data[0].lon);
+    map.leaflet.setView([lat, lng], 15);
+  }
+}
 </script>
 
 <template>
   <div className="main-container">
-    <!-- <dialog id="rest-dialog" open>
-    <h1 class="dialog-header">St. Paul Crime REST API</h1>
-      <label class="dialog-label">URL: </label>
-      <input
-        id="dialog-url"
-        class="dialog-input"
-        type="url"
-        v-model="crime_url"
-        placeholder="http://localhost:8000"
-      />
-      <p class="dialog-error" v-if="dialog_err">Error: must enter valid URL</p>
-      <br />
-      <button class="button" type="button" @click="closeDialog">OK</button>
-  </dialog>   -->
+    <div class="grid-container">
+      <div class="grid-x grid-padding-x">
+        <div class="cell small-9">
+          <input type="text" v-model="locationInput" @keyup.enter="goToLocation" placeholder="Enter address" />
+        </div>
+        <div class="cell small-3">
+          <button class="button" @click="goToLocation">Go</button>
+        </div>
+      </div>
+    </div>
     <div class="grid-container">
       <div class="grid-x grid-padding-x">
         <div id="leafletmap" class="cell auto"></div>
