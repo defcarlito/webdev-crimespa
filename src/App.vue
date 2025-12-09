@@ -2,6 +2,7 @@
 import { reactive, ref, onMounted } from "vue";
 import IncidentTable from "./components/IncidentTable.vue";
 import { neighborhoodToString } from "./scripts/neighborhood.js";
+import NewIncidentForm from "./components/NewIncidentForm.vue";
 
 let crime_url = ref("http://localhost:8000"); // temp filled
 let dialog_err = ref(false);
@@ -55,7 +56,7 @@ onMounted(() => {
   // Create Leaflet map (set bounds and valied zoom levels)
   map.leaflet = L.map("leafletmap").setView(
     [map.center.lat, map.center.lng],
-    map.zoom,
+    map.zoom
   );
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
@@ -162,7 +163,7 @@ function drawNeighborhoods() {
           <p><b>${neighborhoodToString(n.nn)}</b></p>
           <p>${crimeSums.value[n.nn.toString()]} crimes</p>
         `,
-        { permanent: true, className: "marker-label" },
+        { permanent: true, className: "marker-label" }
       );
   });
 }
@@ -200,6 +201,7 @@ async function goToLocation() {
         <div id="leafletmap" class="cell auto"></div>
       </div>
     </div>
+    <NewIncidentForm />
     <div>
       <h1>Filters</h1>
       <div>
