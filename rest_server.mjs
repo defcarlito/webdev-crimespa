@@ -201,7 +201,7 @@ app.get("/incidents", (req, res) => {
     where = "WHERE " + whereConditions.join(" AND ");
   }
 
-  const lim = limit ? limit : 9999;
+  const lim = limit ? limit : 1000;
 
   const q = `
     SELECT *
