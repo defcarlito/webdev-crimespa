@@ -127,12 +127,6 @@ onMounted(() => {
   initializeCrimes(); // temp
 });
 
-function removeFirstXs(address) {
-  const parts = address.split(" ");
-  parts[0] = parts[0].replaceAll("X", "0");
-  return parts.join(" ");
-}
-
 // FUNCTIONS
 // Function called once user has entered REST API URL
 function initializeCrimes() {
@@ -178,7 +172,7 @@ function drawNeighborhoods() {
 
     L.marker([n.location[0], n.location[1]])
       .addTo(map.leaflet)
-      .bindTooltip(
+      .bindPopup(
         `
           <p><b>${neighborhoodToString(n.nn)}</b></p>
           <p>${crimeSums.value[n.nn.toString()]} crimes</p>
@@ -250,6 +244,49 @@ function removeIncident(caseNumber) {
     (inc) => inc.case_number !== caseNumber,
   );
 }
+
+function addCrimeToMap(latLon, inc) {
+  const purpleMarker = L.icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png",
+  });
+  const circleMarker = L.divIcon({
+    className: "circle-marker",
+    iconSize: [16, 16],
+    html: `<div style="
+        width: 20px;
+        height: 20px;
+        background: purple;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 4px rgba(0,0,0,0.5);
+      "></div>`,
+  });
+  console.log(inc);
+  console.log(`Adding crime to map: ${latLon}`);
+
+  const marker = L.marker([latLon[0], latLon[1]], { icon: circleMarker }).addTo(
+    map.leaflet,
+  );
+
+  marker.bindPopup(
+    `
+        <p>${inc.incident}</p>
+        <p>${inc.date}</p>
+        <p>${inc.time}</p>
+        <button class="button alert tiny remove-marker-btn">Remove Marker</button>
+      `,
+    { className: "marker-label" },
+  );
+  marker.on("popupopen", () => {
+    const popupEl = marker.getPopup().getElement();
+    const btn = popupEl.querySelector(".remove-marker-btn");
+    btn.addEventListener("click", () => {
+      map.leaflet.removeLayer(marker);
+    });
+  });
+  marker.openPopup();
+}
 </script>
 
 <template>
@@ -299,6 +336,7 @@ function removeIncident(caseNumber) {
         :incidents="incidents"
         :crimeUrl="crime_url"
         @delete-row="removeIncident"
+        @add-location="addCrimeToMap"
       />
     </div>
   </div>

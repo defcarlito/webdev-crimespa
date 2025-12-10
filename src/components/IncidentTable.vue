@@ -11,7 +11,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["delete-row"]);
+const emit = defineEmits(["delete-row", "add-location"]);
 
 function formatDateString(dateStr) {
   return dateStr;
@@ -51,6 +51,9 @@ function getRowClass(code) {
 }
 
 function deleteRow(caseNumber) {
+  if (!confirm(`Delete case ${caseNumber}?`)) {
+    return;
+  }
   console.log(`Deleted case: ${caseNumber}`);
   fetch(`${props.crimeUrl}/remove-incident?case_number=${caseNumber}`, {
     method: "DELETE",
@@ -64,15 +67,41 @@ function deleteRow(caseNumber) {
       emit("delete-row", caseNumber);
     });
 }
+
+function removeFirstXs(address) {
+  const parts = address.split(" ");
+  parts[0] = parts[0].replaceAll("X", "0");
+  return parts.join(" ");
+}
+
+function findCrime(inc) {
+  console.log(inc);
+  const address = removeFirstXs(inc.block);
+  console.log(address);
+  fetch(`https://nominatim.openstreetmap.org/search?q=${address}&format=jsonv2`)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+      const topSearch = data[0];
+      if (!topSearch) {
+        console.log("Address not found");
+        return;
+      }
+      const latLon = [topSearch.lat, topSearch.lon];
+      emit("add-location", latLon, inc);
+    });
+}
 </script>
 
 <template>
   <div>
     <h5>Legend:</h5>
-    <div>
-      <p class="violent-crimes">Violent Crimes</p>
-      <p class="property-crimes">Property Crimes</p>
-      <p class="other-crimes">Other Crimes</p>
+    <div style="width: fit-content">
+      <ul>
+        <li class="violent-crimes">Violent crimes</li>
+        <li class="property-crimes">Property crimes</li>
+        <li class="other-crimes">Other crimes</li>
+      </ul>
     </div>
   </div>
   <table>
@@ -95,6 +124,9 @@ function deleteRow(caseNumber) {
         <td>
           <button class="button alert" @click="deleteRow(inc.case_number)">
             Delete
+          </button>
+          <button class="button secondary" @click="findCrime(inc)">
+            Find Crime
           </button>
         </td>
       </tr>
