@@ -1,8 +1,16 @@
 <script setup>
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, watch } from "vue";
 import IncidentTable from "./components/IncidentTable.vue";
 import { neighborhoodToString } from "./scripts/neighborhood.js";
+
 import NewIncidentForm from "./components/NewIncidentForm.vue";
+import IncidentTypeFilter from "./components/IncidentTypeFilter.vue";
+import IncidentLimitFilter from "./components/IncidentLimitFilter.vue";
+import NeighborhoodFilter from "./components/NeighborhoodFilter.vue";
+import DateFilter from "./components/DateFilter.vue";
+
+import incidentTypes from "./json/incident-types.json";
+import neighborhoods from "./json/neighborhoods.json";
 
 let crime_url = ref("http://localhost:8000"); // temp filled
 let dialog_err = ref(false);
@@ -13,7 +21,14 @@ for (let i = 1; i <= 17; i++) {
   sums[i] = 0;
 }
 let crimeSums = ref(sums);
-//
+let incidents = ref([]);
+
+// filters
+let selectedIncidentTypeFilters = ref([]);
+let selectedLimit = ref(1000);
+let selectedNeighborhoods = ref([]);
+let selectedStartDate = ref("");
+let selectedEndDate = ref("");
 
 let map = reactive({
   leaflet: null,
@@ -47,14 +62,13 @@ let map = reactive({
     { location: [44.949203, -93.093739], marker: null, nn: 17 },
   ],
 });
-let incidents = ref([]);
 
 // Vue callback for once <template> HTML has been added to web page
 onMounted(() => {
   // Create Leaflet map (set bounds and valied zoom levels)
   map.leaflet = L.map("leafletmap").setView(
     [map.center.lat, map.center.lng],
-    map.zoom
+    map.zoom,
   );
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
@@ -82,7 +96,6 @@ onMounted(() => {
     .catch((error) => {
       console.log("Error:", error);
     });
-
   initializeCrimes(); // temp
 });
 
@@ -95,8 +108,7 @@ function removeFirstXs(address) {
 // FUNCTIONS
 // Function called once user has entered REST API URL
 function initializeCrimes() {
-  const defaultLimit = 1000;
-  fetch(`${crime_url.value}/incidents?${defaultLimit}`)
+  fetch(`${crime_url.value}/incidents`)
     .then((res) => res.json())
     .then((data) => {
       incidents.value = data;
@@ -107,6 +119,10 @@ function initializeCrimes() {
 
 // Sum crime amounts for each neighborhood
 function sumCrimeNums(incidents) {
+  for (let key in crimeSums.value) {
+    sums[key] = 0;
+  }
+
   incidents.forEach((inc) => {
     crimeSums.value[inc.neighborhood_number] += 1;
   });
@@ -128,6 +144,10 @@ function closeDialog() {
 // Draw neighborhood markers
 function drawNeighborhoods() {
   map.neighborhood_markers.forEach((n) => {
+    if (n.marker) {
+      map.leaflet.removeLayer(n.marker);
+    }
+
     L.marker([n.location[0], n.location[1]])
       .addTo(map.leaflet)
       .bindTooltip(
@@ -135,9 +155,52 @@ function drawNeighborhoods() {
           <p><b>${neighborhoodToString(n.nn)}</b></p>
           <p>${crimeSums.value[n.nn.toString()]} crimes</p>
         `,
-        { permanent: true, className: "marker-label" }
+        { permanent: true, className: "marker-label" },
       );
   });
+}
+
+function filterIncidents() {
+  // build codes
+  let allCodes = [];
+  selectedIncidentTypeFilters.value.forEach((incidentType) => {
+    const lowerBound = incidentType.code_range[0];
+    const upperBound = incidentType.code_range[1];
+    for (let i = lowerBound; i <= upperBound; i++) {
+      allCodes.push(i);
+    }
+  });
+
+  // build neighborhood numbers
+  let allNeighborhoodsNumbers = [];
+  selectedNeighborhoods.value.forEach((neighborhood) => {
+    allNeighborhoodsNumbers.push(neighborhood.id);
+  });
+
+  const url = new URL("incidents", crime_url.value);
+  url.searchParams.set("limit", selectedLimit.value);
+  if (allCodes.length != 0) {
+    const allCodesString = allCodes.join(",");
+    url.searchParams.set("code", allCodesString);
+  }
+  if (allNeighborhoodsNumbers.length != 0) {
+    const allNNString = allNeighborhoodsNumbers.join(",");
+    url.searchParams.set("neighborhood", allNNString);
+  }
+  if (selectedStartDate.value != 0) {
+    url.searchParams.set("start_date", selectedStartDate.value);
+  }
+  if (selectedEndDate.value != 0) {
+    url.searchParams.set("end_date", selectedEndDate.value);
+  }
+
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => {
+      incidents.value = data;
+      sumCrimeNums(data);
+      drawNeighborhoods();
+    });
 }
 </script>
 
@@ -162,21 +225,27 @@ function drawNeighborhoods() {
         <div id="leafletmap" class="cell auto"></div>
       </div>
     </div>
-    <NewIncidentForm />
-    <div>
-      <h1>Filters</h1>
-      <div>
-        <p>Incident Type:</p>
-        <select>
-          <option value="1">test</option>
-          <option value="2">test</option>
-          <option value="3">test</option>
-          <option value="4">test</option>
-        </select>
-      </div>
-      <button>Filter</button>
+    <div id="form">
+      <NewIncidentForm />
     </div>
-    <div>
+    <div id="filter">
+      <h1>Filters:</h1>
+      <IncidentTypeFilter
+        :incidentTypes="incidentTypes"
+        v-model:selectedFilters="selectedIncidentTypeFilters"
+      />
+      <IncidentLimitFilter v-model="selectedLimit" />
+      <NeighborhoodFilter
+        :neighborhoods="neighborhoods"
+        v-model:selectedNeighborhoods="selectedNeighborhoods"
+      />
+      <DateFilter
+        v-model:start="selectedStartDate"
+        v-model:end="selectedEndDate"
+      />
+      <button class="button" @click="filterIncidents">Filter</button>
+    </div>
+    <div id="table">
       <IncidentTable :incidents="incidents" />
     </div>
   </div>
@@ -184,13 +253,22 @@ function drawNeighborhoods() {
 
 <style>
 .main-container {
-  margin: 5vh;
+  margin: 10vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 #rest-dialog {
   width: 20rem;
   margin-top: 1rem;
   z-index: 1000;
+}
+
+.grid-container,
+.grid-x,
+.cell {
+  width: 100%;
 }
 
 #leafletmap {

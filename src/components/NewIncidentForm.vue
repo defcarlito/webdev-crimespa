@@ -1,64 +1,90 @@
 <template>
-  <div class="form-wrapper">
-    <div class="form-container">
-      <h2>Add New Incident</h2>
+  <div>
+    <button class="button" @click="showForm = !showForm">
+      {{ showForm ? "Hide Form" : "Add New Incident" }}
+    </button>
 
-      <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+    <transition name="slide">
+      <div v-if="showForm" class="callout" style="margin-top: 1rem">
+        <h4>Add New Incident</h4>
 
-      <form @submit.prevent="submitIncident">
-        <div class="form-row">
-          <div class="form-field">
-            <label>Case Number:</label>
-            <input v-model="case_number" />
-          </div>
-
-          <div class="form-field">
-            <label>Date (YYYY-MM-DD):</label>
-            <input v-model="date" />
-          </div>
+        <div v-if="errorMessage" class="callout alert">
+          {{ errorMessage }}
         </div>
 
-        <div class="form-row">
-          <div class="form-field">
-            <label>Time (HH:MM:SS):</label>
-            <input v-model="time" />
+        <form @submit.prevent="submitIncident">
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12 medium-6">
+              <label>
+                Case Number:
+                <input v-model="case_number" />
+              </label>
+            </div>
+
+            <div class="cell small-12 medium-6">
+              <label>
+                Date (YYYY-MM-DD):
+                <input v-model="date" />
+              </label>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label>Code:</label>
-            <input v-model="code" />
-          </div>
-        </div>
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12 medium-6">
+              <label>
+                Time (HH:MM:SS):
+                <input v-model="time" />
+              </label>
+            </div>
 
-        <div class="form-row full">
-          <div class="form-field full">
-            <label>Incident Description:</label>
-            <input v-model="incident" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label>Police Grid:</label>
-            <input v-model="police_grid" />
+            <div class="cell small-12 medium-6">
+              <label>
+                Code:
+                <input v-model="code" />
+              </label>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label>Neighborhood #:</label>
-            <input v-model="neighborhood_number" />
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12">
+              <label>
+                Incident Description:
+                <input v-model="incident" />
+              </label>
+            </div>
           </div>
-        </div>
 
-        <div class="form-row full">
-          <div class="form-field full">
-            <label>Block:</label>
-            <input v-model="block" />
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12 medium-6">
+              <label>
+                Police Grid:
+                <input v-model="police_grid" />
+              </label>
+            </div>
+
+            <div class="cell small-12 medium-6">
+              <label>
+                Neighborhood #:
+                <input v-model="neighborhood_number" />
+              </label>
+            </div>
           </div>
-        </div>
 
-        <button type="submit" class="submit-btn">Submit Incident</button>
-      </form>
-    </div>
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12">
+              <label>
+                Block:
+                <input v-model="block" />
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="button primary expanded">
+            Submit Incident
+          </button>
+        </form>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -66,6 +92,7 @@
 export default {
   data() {
     return {
+      showForm: false,
       case_number: "",
       date: "",
       time: "",
