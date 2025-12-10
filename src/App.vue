@@ -61,9 +61,9 @@ let map = reactive({
     { location: [44.937705, -93.136997], marker: null, nn: 16 },
     { location: [44.949203, -93.093739], marker: null, nn: 17 },
   ],
+  searchMarker: null,
 });
 let locationInput = ref("St. Paul, MN");
-let searchMarker = null;
 
 // Vue callback for once <template> HTML has been added to web page
 onMounted(() => {
@@ -246,10 +246,6 @@ function removeIncident(caseNumber) {
 }
 
 function addCrimeToMap(latLon, inc) {
-  const purpleMarker = L.icon({
-    iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png",
-  });
   const circleMarker = L.divIcon({
     className: "circle-marker",
     iconSize: [16, 16],
@@ -265,27 +261,33 @@ function addCrimeToMap(latLon, inc) {
   console.log(inc);
   console.log(`Adding crime to map: ${latLon}`);
 
+  if (map.searchMarker) {
+    map.leaflet.removeLayer(map.searchMarker);
+    map.searchMarker = null;
+  }
+
   const marker = L.marker([latLon[0], latLon[1]], { icon: circleMarker }).addTo(
     map.leaflet,
   );
 
-  marker.bindPopup(
-    `
+  marker
+    .bindPopup(
+      `
         <p>${inc.incident}</p>
         <p>${inc.date}</p>
         <p>${inc.time}</p>
-        <button class="button alert tiny remove-marker-btn">Remove Marker</button>
       `,
-    { className: "marker-label" },
-  );
-  marker.on("popupopen", () => {
-    const popupEl = marker.getPopup().getElement();
-    const btn = popupEl.querySelector(".remove-marker-btn");
-    btn.addEventListener("click", () => {
-      map.leaflet.removeLayer(marker);
-    });
+      { className: "marker-label" },
+    )
+    .openPopup();
+
+  marker.on("popupclose", () => {
+    if (map.searchMarker) {
+      map.leaflet.removeLayer(map.searchMarker);
+      map.searchMarker = null;
+    }
   });
-  marker.openPopup();
+  map.searchMarker = marker;
 }
 </script>
 
