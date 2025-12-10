@@ -65,5 +65,6 @@ import TeamMembers from "../json/team-members.json";
 
 .portrait {
   width: 256px;
+  height: 256px;
 }
 </style>
