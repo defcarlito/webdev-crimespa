@@ -6,7 +6,12 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  crimeUrl: {
+    type: String,
+  },
 });
+
+const emit = defineEmits(["delete-row"]);
 
 function formatDateString(dateStr) {
   return dateStr;
@@ -15,9 +20,61 @@ function formatDateString(dateStr) {
 function formatTimeString(timeStr) {
   return timeStr;
 }
+
+const violentCrimeCodes = [
+  [100, 120],
+  [210, 220],
+  [300, 374],
+  [400, 453],
+  [810, 863],
+  [2619, 2619],
+];
+
+const propertyCrimeCodes = [
+  [500, 566],
+  [600, 693],
+  [700, 732],
+  [900, 982],
+  [1400, 1436],
+];
+
+function getRowClass(code) {
+  for (const [low, high] of violentCrimeCodes) {
+    if (code >= low && code <= high) return "violent-crimes";
+  }
+
+  for (const [low, high] of propertyCrimeCodes) {
+    if (code >= low && code <= high) return "property-crimes";
+  }
+
+  return "other-crimes";
+}
+
+function deleteRow(caseNumber) {
+  console.log(`Deleted case: ${caseNumber}`);
+  fetch(`${props.crimeUrl}/remove-incident?case_number=${caseNumber}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ case_number: caseNumber }),
+  })
+    .then((res) => res.text())
+    .then(() => {
+      emit("delete-row", caseNumber);
+    });
+}
 </script>
 
 <template>
+  <div>
+    <h5>Legend:</h5>
+    <div>
+      <p class="violent-crimes">Violent Crimes</p>
+      <p class="property-crimes">Property Crimes</p>
+      <p class="other-crimes">Other Crimes</p>
+    </div>
+  </div>
   <table>
     <thead>
       <tr>
@@ -29,13 +86,32 @@ function formatTimeString(timeStr) {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="inc in incidents">
+      <tr v-for="inc in incidents" :class="getRowClass(inc.code)">
         <td>{{ inc.case_number }}</td>
         <td>{{ inc.incident }}</td>
         <td>{{ neighborhoodToString(inc.neighborhood_number) }}</td>
         <td>{{ formatDateString(inc.date) }}</td>
         <td>{{ formatTimeString(inc.time) }}</td>
+        <td>
+          <button class="button alert" @click="deleteRow(inc.case_number)">
+            Delete
+          </button>
+        </td>
       </tr>
     </tbody>
   </table>
 </template>
+
+<style>
+.violent-crimes {
+  background-color: rgba(255, 0, 0, 0.3) !important;
+}
+
+.property-crimes {
+  background-color: rgba(0, 0, 255, 0.3) !important;
+}
+
+.other-crimes {
+  background-color: rgba(0, 128, 0, 0.3) !important;
+}
+</style>

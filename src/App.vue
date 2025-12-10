@@ -244,6 +244,12 @@ async function goToLocation() {
     map.leaflet.setView([lat, lng], 15);
   }
 }
+
+function removeIncident(caseNumber) {
+  incidents.value = incidents.value.filter(
+    (inc) => inc.case_number !== caseNumber,
+  );
+}
 </script>
 
 <template>
@@ -289,7 +295,11 @@ async function goToLocation() {
       <button class="button" @click="filterIncidents">Filter</button>
     </div>
     <div id="table">
-      <IncidentTable :incidents="incidents" />
+      <IncidentTable
+        :incidents="incidents"
+        :crimeUrl="crime_url"
+        @delete-row="removeIncident"
+      />
     </div>
   </div>
 </template>
