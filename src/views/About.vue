@@ -18,6 +18,15 @@ import TeamMembers from "../json/team-members.json";
       </div>
     </div>
     <div>
+      <h1 class="text-center">Tools Used</h1>
+      <ul>
+        <li>Vue</li>
+        <li>Node.js & Express.js</li>
+        <li>Nominatim API</li>
+        <li>Leaflet API</li>
+      </ul>
+    </div>
+    <div>
       <h1 class="text-center">Video Overview</h1>
       <!-- placeholder video for now -->
       <iframe
@@ -27,7 +36,7 @@ import TeamMembers from "../json/team-members.json";
     </div>
     <div>
       <h1 class="text-center">Interesting Findings</h1>
-      <ul class="interesting-findings">
+      <ul>
         <li>Thing 1</li>
         <li>Thing 2</li>
         <li>Thing 3</li>
@@ -47,7 +56,7 @@ import TeamMembers from "../json/team-members.json";
   gap: 2rem;
 }
 
-.interesting-findings {
+.center-list {
   list-style-position: inside;
   padding-left: 0;
   margin: 0 auto;
