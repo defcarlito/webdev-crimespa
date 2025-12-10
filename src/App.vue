@@ -62,7 +62,6 @@ let map = reactive({
     { location: [44.949203, -93.093739], marker: null, nn: 17 },
   ],
 });
-let incidents = ref([]);
 let locationInput = ref("St. Paul, MN");
 let searchMarker = null;
 
@@ -86,25 +85,25 @@ onMounted(() => {
 
   // Add center marker
   const centerIcon = L.divIcon({
-    className: 'center-marker',
+    className: "center-marker",
     html: '<div style="background: red; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px black;"></div>',
     iconSize: [20, 20],
-    iconAnchor: [10, 10]
+    iconAnchor: [10, 10],
   });
 
   const centerMarker = L.marker(map.leaflet.getCenter(), {
     icon: centerIcon,
-    interactive: false
+    interactive: false,
   }).addTo(map.leaflet);
 
   // Update location when map moves
-  map.leaflet.on('moveend', async () => {
+  map.leaflet.on("moveend", async () => {
     const center = map.leaflet.getCenter();
     centerMarker.setLatLng(center);
 
     // Get address for center
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}`,
     );
     const data = await response.json();
     locationInput.value = data.display_name;
@@ -230,11 +229,12 @@ function filterIncidents() {
       sumCrimeNums(data);
       drawNeighborhoods();
     });
+}
 // Go to location
 async function goToLocation() {
   const address = locationInput.value + ", St. Paul, MN";
   const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
   );
   const data = await response.json();
 
