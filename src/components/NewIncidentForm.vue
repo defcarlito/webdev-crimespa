@@ -1,97 +1,12 @@
-<template>
-  <div>
-    <button class="button" @click="showForm = !showForm">
-      {{ showForm ? "Hide Form" : "Add New Incident" }}
-    </button>
-
-    <transition name="slide">
-      <div v-if="showForm" class="callout" style="margin-top: 1rem">
-        <h4>Add New Incident</h4>
-
-        <div v-if="errorMessage" class="callout alert">
-          {{ errorMessage }}
-        </div>
-
-        <form @submit.prevent="submitIncident">
-          <div class="grid-x grid-margin-x">
-            <div class="cell small-12 medium-6">
-              <label>
-                Case Number:
-                <input v-model="case_number" />
-              </label>
-            </div>
-
-            <div class="cell small-12 medium-6">
-              <label>
-                Date (YYYY-MM-DD):
-                <input v-model="date" />
-              </label>
-            </div>
-          </div>
-
-          <div class="grid-x grid-margin-x">
-            <div class="cell small-12 medium-6">
-              <label>
-                Time (HH:MM:SS):
-                <input v-model="time" />
-              </label>
-            </div>
-
-            <div class="cell small-12 medium-6">
-              <label>
-                Code:
-                <input v-model="code" />
-              </label>
-            </div>
-          </div>
-
-          <div class="grid-x grid-margin-x">
-            <div class="cell small-12">
-              <label>
-                Incident Description:
-                <input v-model="incident" />
-              </label>
-            </div>
-          </div>
-
-          <div class="grid-x grid-margin-x">
-            <div class="cell small-12 medium-6">
-              <label>
-                Police Grid:
-                <input v-model="police_grid" />
-              </label>
-            </div>
-
-            <div class="cell small-12 medium-6">
-              <label>
-                Neighborhood #:
-                <input v-model="neighborhood_number" />
-              </label>
-            </div>
-          </div>
-
-          <div class="grid-x grid-margin-x">
-            <div class="cell small-12">
-              <label>
-                Block:
-                <input v-model="block" />
-              </label>
-            </div>
-          </div>
-
-          <button type="submit" class="button primary expanded">
-            Submit Incident
-          </button>
-        </form>
-      </div>
-    </transition>
-  </div>
-</template>
-
 <script>
+import Codes from "../json/codes.json";
+import Neighborhoods from "../json/neighborhoods.json";
+
 export default {
   data() {
     return {
+      Codes,
+      Neighborhoods,
       showForm: false,
       case_number: "",
       date: "",
@@ -163,6 +78,105 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div>
+    <button class="button" @click="showForm = !showForm">
+      {{ showForm ? "Hide Form" : "Add New Incident" }}
+    </button>
+
+    <transition name="slide">
+      <div v-if="showForm" class="callout" style="margin-top: 1rem">
+        <h4>Add New Incident</h4>
+
+        <div v-if="errorMessage" class="callout alert">
+          {{ errorMessage }}
+        </div>
+
+        <form @submit.prevent="submitIncident">
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12 medium-6">
+              <label>
+                Case Number:
+                <input v-model="case_number" />
+              </label>
+            </div>
+
+            <div class="cell small-12 medium-6">
+              <label>
+                Date (YYYY-MM-DD):
+                <input v-model="date" />
+              </label>
+            </div>
+          </div>
+
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12 medium-6">
+              <label>
+                Time (HH:MM:SS):
+                <input v-model="time" />
+              </label>
+            </div>
+
+            <div class="cell small-12 medium-6">
+              <label>
+                Code:
+                <select v-model="code">
+                  <option v-for="c in Codes" :value="c.code">
+                    {{ c.code }}: {{ c.description }}
+                  </option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12">
+              <label>
+                Incident Description:
+                <input v-model="incident" />
+              </label>
+            </div>
+          </div>
+
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12 medium-6">
+              <label>
+                Police Grid:
+                <input v-model="police_grid" />
+              </label>
+            </div>
+
+            <div class="cell small-12 medium-6">
+              <label>
+                Neighborhood #:
+                <!-- <input v-model="neighborhood_number" /> -->
+                <select v-model="neighborhood_number">
+                  <option v-for="n in Neighborhoods" :value="n.id">
+                    {{ n.name }}
+                  </option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid-x grid-margin-x">
+            <div class="cell small-12">
+              <label>
+                Block:
+                <input v-model="block" />
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="button primary expanded">
+            Submit Incident
+          </button>
+        </form>
+      </div>
+    </transition>
+  </div>
+</template>
 
 <style scoped>
 .form-wrapper {
