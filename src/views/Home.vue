@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted, watch } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import IncidentTable from "../components/IncidentTable.vue";
 import { neighborhoodToString } from "../scripts/neighborhood.js";
 
@@ -12,7 +12,7 @@ import DateFilter from "../components/DateFilter.vue";
 import incidentTypes from "../json/incident-types.json";
 import neighborhoods from "../json/neighborhoods.json";
 
-let crime_url = ref("http://localhost:8000"); // temp filled
+let crime_url = ref("");
 let dialog_err = ref(false);
 
 // init neighborhood number crime sums to 0
@@ -292,6 +292,20 @@ function addCrimeToMap(latLon, inc) {
 </script>
 
 <template>
+  <dialog id="rest-dialog" open>
+    <h1 class="dialog-header">St. Paul Crime REST API</h1>
+    <label class="dialog-label">URL: </label>
+    <input
+      id="dialog-url"
+      class="dialog-input"
+      type="url"
+      v-model="crime_url"
+      placeholder="http://localhost:8000"
+    />
+    <p class="dialog-error" v-if="dialog_err">Error: must enter valid URL</p>
+    <br />
+    <button class="button" type="button" @click="closeDialog">OK</button>
+  </dialog>
   <div className="main-container">
     <div class="grid-container">
       <div class="grid-x grid-padding-x">
