@@ -9,7 +9,7 @@ import TeamMembers from "../json/team-members.json";
       <div class="grid-x align-center grid-margin-x">
         <div
           v-for="member in TeamMembers"
-          class="cell medium-shrink small-12 text-center"
+          class="cell medium-shrink small-12 text-center member-card"
         >
           <img :src="member.imgUrl" alt="team member photo" class="portrait" />
           <h3>{{ member.name }}</h3>
@@ -76,6 +76,17 @@ import TeamMembers from "../json/team-members.json";
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+.member-card {
+  max-width: 256px;
+  margin: 0 auto;
+}
+
+.member-card p,
+.member-card h3 {
+  max-width: 256px;
+  word-wrap: break-word;
 }
 
 .center-list {

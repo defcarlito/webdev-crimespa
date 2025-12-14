@@ -1,17 +1,17 @@
 [
   {
     "name": "Harrison Amorim",
-    "description": "Placeholder description.",
+    "description": "I am a senior studying Computer Science from Rochester, Minnesota, aspiring to become a Software Engineer with a focus on backend systems.",
     "imgUrl": "/images/harrison.jpg"
   },
   {
     "name": "Samuel Dewey",
-    "description": "Placeholder description.",
+    "description": "Placeholder",
     "imgUrl": "/images/samuel.jpeg"
   },
   {
     "name": "Angelika Vinorova",
-    "description": "Placeholder description.",
+    "description": "Placeholder",
     "imgUrl": "/images/angelika.jpg"
   }
 ]
