@@ -28,11 +28,13 @@ import TeamMembers from "../json/team-members.json";
     </div>
     <div>
       <h1 class="text-center">Video Overview</h1>
+
       <!-- placeholder video for now -->
-      <iframe
+      <video
         class="grid-x align-center"
-        src="https://www.youtube.com/watch?v=PZ_ebxkNZmo"
-      ></iframe>
+        src="/video/demonstration.mp4"
+        controls
+      ></video>
     </div>
     <div>
       <h1 class="text-center">Interesting Findings</h1>
